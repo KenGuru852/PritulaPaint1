@@ -10,21 +10,35 @@ using System.Threading.Tasks;
 
 namespace Paint.Models
 {
-    public class MixLineClass : MultipleCorners
+    public class MixLineClass : Figure
     {
-        public string MixCommand { get; set; }
+        public override string Name { get; set; }
 
-        public Path MixLinesPoggers { get; set; }
+        private string _FigureType = "MixLine";
+        public override string FigureType { get => _FigureType; set { _FigureType = value; } }
+
+        public override string Commands { get; set; }
+
+        public override int LineThickness { get; set; }
+
+        public override string LineColor { get; set; }
+
+        public override string FillColor { get; set; }
+
+        private bool _ActiveButton { get; set; }
+        public override bool ActiveButton { get => _ActiveButton; set { _ActiveButton = value; } }
+        public Path MixLines { get; set; }
 
         public MixLineClass(string _Name, string _MixLineCommand, int _LineThickness, string _LineColor, string _FillColor)
         {
-            MixLinesPoggers = new Path();
+            FigureType = "MixLine";
+            MixLines = new Path();
             Name = _Name;
             LineThickness = _LineThickness;
             LineColor = _LineColor;
-            MixCommand = _MixLineCommand;
+            Commands = _MixLineCommand;
             FillColor = _FillColor;
-            MixLinesPoggers.Data = (Geometry.Parse(MixCommand));
+            MixLines.Data = (Geometry.Parse(Commands));
         }
     }
 }

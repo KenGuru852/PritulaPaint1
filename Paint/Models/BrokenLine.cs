@@ -9,17 +9,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.ComponentModel;
 
 namespace Paint.Models
 {
-    public class BrokenLine : Line
+    public class BrokenLine : Figure 
     {
+        private bool _ActiveButton { get; set; }
+        public override bool ActiveButton { get => _ActiveButton; set { _ActiveButton = value; } }
+        public override string Name {get;set;}
+
+        private string _FigureType = "BrokenLine";
+        public override string FigureType { get => _FigureType;set { _FigureType = value; } }
+
+        private string _FigurePoint { get; set; }
+        public override string FigurePoint { get => _FigurePoint; set { _FigurePoint = value; } }
         public BrokenLine() { }
-        private string _BrokenLinePoints { get; set; }
 
-        public Points GetPoints {get; set; }
-        public string BrokenLinePoints { get => _BrokenLinePoints; set { _BrokenLinePoints = value; } }
+        public override Points GetPoints { get; set; }
 
+        public override int LineThickness { get; set; }
+
+        public override string LineColor { get; set; }
 
         public BrokenLine(string SName, string SBrokenPoints, int SLineThickness, string SLineColor)
         {
@@ -33,9 +45,10 @@ namespace Paint.Models
             }
             // "20 400, 400 500, 550 870"
             Name = SName;
-            _BrokenLinePoints = SBrokenPoints;
+            _FigurePoint = SBrokenPoints;
             LineThickness= SLineThickness;
             LineColor = SLineColor;
+            FigureType = "BrokenLine";
         }
 
         //BrokenLines.Add(new BrokenLine { Name = _Name, BrokenLinePoints = BrokenPoints, LineThickness = lineThickness, LineColor = Colors[SelectedBoxIndex]

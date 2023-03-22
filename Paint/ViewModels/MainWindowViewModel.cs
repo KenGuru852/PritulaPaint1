@@ -12,11 +12,25 @@ using Avalonia.Controls;
 using Paint.Views;
 using System.Diagnostics;
 using System.Reactive;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Avalonia.Input.Raw;
+using Avalonia.Input;
+using JetBrains.Annotations;
+using Avalonia.Media;
+using DynamicData.Binding;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Paint.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
+
+
+
 
         public int Choosing = 0;
         private ObservableCollection<Line> lines;
@@ -43,9 +57,9 @@ namespace Paint.ViewModels
             get { return recFigures; }
             set { this.RaiseAndSetIfChanged(ref recFigures, value); }
         }
-        private ObservableCollection<Line> allFigure;
+        private ObservableCollection<Figure> allFigure;
 
-        public ObservableCollection<Line> AllFigure
+        public ObservableCollection<Figure> AllFigure
         {
             get { return allFigure; }
             set { this.RaiseAndSetIfChanged(ref allFigure, value); }
@@ -59,16 +73,14 @@ namespace Paint.ViewModels
 
         public MainWindowViewModel()
         {
-           // DeleteButton = ReactiveCommand.Create<Unit, Unit>(_ => { RemoveButton(); return new Unit(); });
-            Lines = new ObservableCollection<Line>();
-            BrokenLines = new ObservableCollection<BrokenLine>();
-            MultipleCornersFig = new ObservableCollection<MultipleCorners>();
-            RecFigures = new ObservableCollection<RectangleClass>();
-            EllipseFigures = new ObservableCollection<EllipseFigure>();
-            MixLineFigures = new ObservableCollection<MixLineClass>();
-            AllFigure = new ObservableCollection<Line>();
+            // DeleteButton = ReactiveCommand.Create<Unit, Unit>(_ => { RemoveButton(); return new Unit(); });
+            AllFigure = new ObservableCollection<Figure>();
             content = allContent[0];
+            ListBoxSelectedIndex = -1;
+            CommandFormat = Formats[0];
 
+            xmlsavers = new XMLSaver();
+            xmlloaders = new XMLLoader();
         }
 
        // public ReactiveCommand<Unit, Unit> DeleteButton { get; }
@@ -88,7 +100,17 @@ namespace Paint.ViewModels
         public int SelectedFigure
         {
             get => Choosing;
-            set { this.RaiseAndSetIfChanged(ref Choosing, value); Content = allContent[value]; }
+            set { this.RaiseAndSetIfChanged(ref Choosing, value); 
+                Content = allContent[value];
+                CommandFormat = Formats[SelectedFigure];
+            }
+        }
+
+        private string commandFormat;
+        public string CommandFormat
+        {
+            get { return commandFormat; }
+            set { this.RaiseAndSetIfChanged(ref commandFormat, value); }
         }
 
         public UserControl Content
@@ -97,42 +119,111 @@ namespace Paint.ViewModels
             set { this.RaiseAndSetIfChanged(ref content, value); }
         }
 
+        string[] Formats = { "Точки: X Y", "Точки: X Y,X Y,X Y", "Точки: X Y,X Y,X Y", "Начальная точка: X Y\nШирина: W\nВысота: Н", "Начальная точка: X Y\nШирина: W\nВысота: H", "" };
+
         string[] Colors = { "Red", "Yellow", "Blue", "Green", "Black" };
 
         public void AddLine()
         {
+            Debug.WriteLine(ListBoxSelectedIndex);
+            bool check = true;
+            for (int i = 0; i < AllFigure.Count; i++)
+            {
+                if (Name == AllFigure[i].Name)
+                {
+                    check = false;
+                }
+            }
+            if (ListBoxSelectedIndex == -1)
+            {
+                if (check)
+                {
+                    if (Choosing == 0)
+                    {
+                        AllFigure.Add(new Line { Name = _Name, XPoint = Point.Parse(_FirstPoint), YPoint = Point.Parse(_SecondPoint), LineThickness = lineThickness, LineColor = Colors[SelectedBoxIndex] });
+                    }
+                    if (Choosing == 1)
+                    {
+                        AllFigure.Add(new BrokenLine(_Name, _BrokenPoints, lineThickness, Colors[SelectedBoxIndex]));
+                    }
+                    if (Choosing == 2)
+                    {
+                        AllFigure.Add(new MultipleCorners(_Name, _BrokenPoints, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex]));
+                    }
+                    if (Choosing == 3)
+                    {
+                        AllFigure.Add(new RectangleClass(_Name, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex], _Height, _Width, _FirstPoint));
+                    }
+                    if (Choosing == 4)
+                    {
+                        AllFigure.Add(new EllipseFigure(_Name, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex], _Height, _Width, _FirstPoint));
+                    }
+                    if (Choosing == 5)
+                    {
+                        AllFigure.Add(new MixLineClass(_Name, _MixCommands, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex]));
+                    }
+                    //Debug.WriteLine(BrokenPoints);
+                    //Debug.WriteLine(ListBoxSelectedIndex);
+                }
+            }
+            else
+            {
+                //AllFigure[0].Name = "RUHID";
+                Editor(ListBoxSelectedIndex);
+                //Debug.WriteLine(AllFigure[ListBoxSelectedIndex].Name);
+                
+            }
+        }
+
+        private void Editor (int Index)
+        {
+            string NewName = Name;
+            string NewColor = Colors[SelectedBoxIndex];
+            int NewThickness = lineThickness;
+
             if (Choosing == 0)
             {
-                Lines.Add(new Line { Name = _Name, XPoint = Point.Parse(_FirstPoint), YPoint = Point.Parse(_SecondPoint), LineThickness = lineThickness, LineColor = Colors[SelectedBoxIndex] });
-                AllFigure.Add(new Line { Name = _Name, XPoint = Point.Parse(_FirstPoint), YPoint = Point.Parse(_SecondPoint), LineThickness = lineThickness, LineColor = Colors[SelectedBoxIndex] });
+                Point NewXPoint = Point.Parse(FirstPoint);
+                Point NewYPoint = Point.Parse(SecondPoint);
+                AllFigure.Add(new Line { Name = NewName, XPoint = NewXPoint, 
+                YPoint = NewYPoint, LineThickness = NewThickness, LineColor = NewColor });
             }
+
             if (Choosing == 1)
             {
-                BrokenLines.Add(new BrokenLine (_Name, _BrokenPoints, lineThickness, Colors[SelectedBoxIndex] ));
-                AllFigure.Add(new BrokenLine(_Name, _BrokenPoints, lineThickness, Colors[SelectedBoxIndex]));
+               string NewFigurePoint = BrokenPoints;
+               AllFigure.Add(new BrokenLine(NewName, NewFigurePoint, NewThickness, NewColor));
             }
             if (Choosing == 2)
             {
-                MultipleCornersFig.Add(new MultipleCorners(_Name, _BrokenPoints, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex]));
-                AllFigure.Add(new MultipleCorners(_Name, _BrokenPoints, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex]));
+                string NewFigurePoint = BrokenPoints;
+                string NewFillColor = Colors[SelectedFillIndex];
+                string NewWidth = Width;
+                AllFigure.Add(new MultipleCorners(NewName, NewFigurePoint, NewThickness, NewColor, NewFillColor));
             }
             if (Choosing == 3)
             {
-                RecFigures.Add(new RectangleClass(_Name, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex], _Height, _Width, _FirstPoint));
-                AllFigure.Add(new RectangleClass(_Name, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex], _Height, _Width, _FirstPoint));
+                string NewFigurePoint = FirstPoint;
+                string NewFillColor =  Colors[SelectedFillIndex];
+                string NewWidth = Width;
+                string NewHeight = Height;
+                AllFigure.Add(new RectangleClass(NewName, NewThickness, NewColor, NewFillColor, NewHeight, NewWidth, NewFigurePoint));
             }
             if (Choosing == 4)
             {
-                EllipseFigures.Add(new EllipseFigure(_Name, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex], _Height, _Width, _FirstPoint));
-                AllFigure.Add(new EllipseFigure(_Name, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex], _Height, _Width, _FirstPoint));
+                string NewFigurePoint = FirstPoint;
+                string NewFillColor = Colors[SelectedFillIndex];
+                string NewWidth = Width;
+                string NewHeight = Height;
+                AllFigure.Add(new EllipseFigure(NewName, NewThickness, NewColor, NewFillColor, NewHeight, NewWidth, NewFigurePoint));
             }
             if (Choosing == 5)
             {
-                MixLineFigures.Add(new MixLineClass(_Name, _MixCommands, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex]));
-                AllFigure.Add(new MixLineClass(_Name, _MixCommands, lineThickness, Colors[SelectedBoxIndex], Colors[_SelectedFillIndex]));
+                string NewFillColor = Colors[SelectedFillIndex];
+                string NewCommands = MixCommands;
+                AllFigure.Add(new MixLineClass(NewName, NewCommands, NewThickness, NewColor, NewFillColor));
             }
-            Debug.WriteLine(BrokenPoints);
-            Debug.WriteLine(ListBoxSelectedIndex);
+            AllFigure.RemoveAt(Index);
         }
 
         private string _MixCommands;
@@ -146,8 +237,8 @@ namespace Paint.ViewModels
 
         }
 
-        private int _Width;
-        public int Width
+        private string _Width;
+        public string Width
         {
             get => _Width;
             set
@@ -168,8 +259,8 @@ namespace Paint.ViewModels
 
         }
 
-        private int _Height;
-        public int Height
+        private string _Height;
+        public string Height
         {
             get => _Height;
             set
@@ -181,9 +272,31 @@ namespace Paint.ViewModels
 
         public void RemoveButton()
         {
-            AllFigure.RemoveAt(ListBoxSelectedIndex);
+            if (ListBoxSelectedIndex != -1)
+            {
+                AllFigure.RemoveAt(ListBoxSelectedIndex);
+            }
         }
 
+        private bool _ButtonActive;
+        public bool ButtonActive
+        {
+            get => _ButtonActive;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _ButtonActive, value);
+            }
+        }
+
+        private bool _AddButtonActives;
+        public bool AddButtonActives
+        {
+            get => _AddButtonActives;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _AddButtonActives, value);
+            }
+        }
 
         private int _SelectedIndex;
         public int SelectedIndex
@@ -220,18 +333,78 @@ namespace Paint.ViewModels
 
         public void ResetButton()
         {
-            Name = " ";
-            BrokenPoints = " ";
+            ListBoxSelectedIndex = -1;
+            Name = "";
+            BrokenPoints = "";
             FirstPoint = "0, 0";
             SecondPoint = "0, 0";
-            Width = 0;
-            Height = 0;
+            Width = "0";
+            Height = "0";
             SelectedFillIndex = 0;
             lineThickness = 0;
             SelectedBoxIndex = 0;
             MixCommands = "";
         }
 
+        private int FindColor (string ColorName)
+        {
+            for (int i = 0; i < Colors.Length; i++)
+            {
+                if (ColorName == Colors[i])
+                {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        // "BrokenLine" "Ellipse" "Line" "MixLine" "MultipleCorners" "Rectangle"
+        public void ChangeParametr(int Index)
+        {
+            Name = AllFigure[Index].Name;
+            SelectedBoxIndex = FindColor(AllFigure[Index].LineColor);
+            lineThickness = AllFigure[Index].LineThickness;
+
+            if (AllFigure[Index].FigureType == "Line")
+            {
+                SelectedFigure = 0;
+                FirstPoint = AllFigure[Index].XPoint.ToString();
+                SecondPoint = AllFigure[Index].YPoint.ToString();
+            }
+            if (AllFigure[Index].FigureType == "BrokenLine")
+            {
+                SelectedFigure = 1;
+                BrokenPoints = AllFigure[Index].FigurePoint;
+            }
+            if (AllFigure[Index].FigureType == "MultipleCorners")
+            {
+                SelectedFigure = 2;
+                BrokenPoints = AllFigure[Index].FigurePoint;
+                SelectedFillIndex = FindColor(AllFigure[Index].FillColor);
+            }
+            if (AllFigure[Index].FigureType == "Rectangle")
+            {
+                SelectedFigure = 3;
+                FirstPoint = AllFigure[Index].FigurePoint;
+                SelectedFillIndex = FindColor(AllFigure[Index].FillColor);
+                Width = AllFigure[Index].Width.ToString();
+                Height = AllFigure[Index].Height.ToString();
+            }
+            if (AllFigure[Index].FigureType == "Ellipse")
+            {
+                SelectedFigure = 4;
+                FirstPoint = AllFigure[Index].FigurePoint;
+                SelectedFillIndex = FindColor(AllFigure[Index].FillColor);
+                Width = AllFigure[Index].Width.ToString();
+                Height = AllFigure[Index].Height.ToString();
+            }
+            if (AllFigure[Index].FigureType == "MixLine")
+            {
+                SelectedFigure = 5;
+                SelectedFillIndex = FindColor(AllFigure[Index].FillColor);
+                MixCommands = AllFigure[Index].Commands;
+            }
+        }
 
 
         private int _ListBoxSelectedIndex;
@@ -241,24 +414,53 @@ namespace Paint.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _ListBoxSelectedIndex, value);
-                Debug.WriteLine(ListBoxSelectedIndex);
-                Name = AllFigure[ListBoxSelectedIndex].Name;
-                lineThickness = AllFigure[ListBoxSelectedIndex].LineThickness;
-                FirstPoint = AllFigure[ListBoxSelectedIndex].XPoint.ToString();
-                SecondPoint = AllFigure[ListBoxSelectedIndex].YPoint.ToString();
-                string TempColor = "";
-                TempColor = AllFigure[ListBoxSelectedIndex].LineColor;
-                int TempPoint = 0;
-                foreach (var item in Colors)
+
+                if (ListBoxSelectedIndex == -1)
                 {
-                    if (Colors[TempPoint] == TempColor)
-                    {
-                        break;
-                    }
-                    else TempPoint++;
+                    Name = "";
+                    lineThickness = 0;
+                    FirstPoint = "";
+                    SecondPoint = "";
+                    SelectedBoxIndex = 0;
                 }
-                SelectedBoxIndex = TempPoint;
-                MixCommands = "";
+                else
+                {
+                    ChangeParametr(ListBoxSelectedIndex);
+                }
+         /*       else
+                {
+                    ButtonActive = true;
+                    AllFigure[ListBoxSelectedIndex].ActiveButton = true;
+                   for (int i = 0; i < AllFigure.Count; i++)
+                    {
+                        if (i == ListBoxSelectedIndex)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            AllFigure[i].ActiveButton = false;
+                        }
+                    }
+                    Debug.WriteLine(ListBoxSelectedIndex);
+                    Name = AllFigure[ListBoxSelectedIndex].Name;
+                    lineThickness = AllFigure[ListBoxSelectedIndex].LineThickness;
+                    FirstPoint = AllFigure[ListBoxSelectedIndex].XPoint.ToString();
+                    SecondPoint = AllFigure[ListBoxSelectedIndex].YPoint.ToString();
+                    string TempColor = "";
+                    TempColor = AllFigure[ListBoxSelectedIndex].LineColor;
+                    int TempPoint = 0;
+                    foreach (var item in Colors)
+                    {
+                        if (Colors[TempPoint] == TempColor)
+                        {
+                            break;
+                        }
+                        else TempPoint++;
+                    }
+                    SelectedBoxIndex = TempPoint;
+                    MixCommands = "";
+                }*/
             }
 
         }
@@ -327,6 +529,27 @@ namespace Paint.ViewModels
                 this.RaiseAndSetIfChanged(ref _Name, value);
             }
 
+        }
+        public IEnumerable<ISaverLoaderFactory> SaverLoaderFactoryCollection { get; set; }
+
+        public XMLSaver xmlsavers;
+
+        public XMLLoader xmlloaders;
+
+        public void SaveFigures(string path)
+        {
+            //  jsonsavers.Save(AllFigure, path);
+            xmlsavers.Save(AllFigure, path);
+            //figureSaver =  SaverLoaderFactoryCollection.FirstOrDefault(factory => factory.IsMatch(path) == true)?.CreateSaver();
+            //if (figureSaver != null)
+            //{
+             //   figureSaver.Save(AllFigure, path);
+            //}
+        }
+
+        public void LoadFigures(string path)
+        {
+            AllFigure = new ObservableCollection<Figure>(xmlloaders.Load(path));
         }
     }
 }

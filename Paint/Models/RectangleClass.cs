@@ -8,33 +8,36 @@ using System.Threading.Tasks;
 
 namespace Paint.Models
 {
-    public class RectangleClass : MultipleCorners
+    public class RectangleClass : Figure
     {
-        private string _SStartPoint;
+        private string _FigureType = "Rectangle";
 
+        public override string Name { get; set; }
+        public override string FigureType { get => _FigureType; set { _FigureType = value; } }
         public RectangleClass() { }
-        public int HeightRec { get; set; }
-        public int WidthRec { get; set; }
+        public override Rect RectClassRect { get; set; }
+        public override int Width { get; set; }
+        public override int Height { get; set; }
+        public override int LineThickness { get; set; }
+        public override string LineColor { get; set; }
+        private bool _ActiveButton { get; set; }
+        public override bool ActiveButton { get => _ActiveButton; set { _ActiveButton = value; } }
+        public override string FillColor { get; set; }
+        public override string FigurePoint { get; set; }
 
-
-        public Rect RectClassRect { get; set; }
-
-
-
-        public string SStartPoint { get => _SStartPoint; set { _SStartPoint = value; } }
-        private string _RecStartPoint { get; set; }
-        public string RecStartPoint { get => _RecStartPoint; set { _RecStartPoint = value; } }
-        public RectangleClass(string _Name, int _LineThickness, string _LineColor, string _FillColor, int height, int width, string _StartPoint)
+        public RectangleClass(string _Name, int _LineThickness, string _LineColor, string _FillColor, string height, string width, string _StartPoint)
         {
+            FigureType = "Rectangle";
             Name = _Name;
-            HeightRec = height;
-            WidthRec = width;
-            SStartPoint = _StartPoint;
-            string RectPointsString = SStartPoint + ',' + width.ToString() + ',' + height.ToString(); 
+            Height = int.Parse(height);
+            Width = int.Parse(width);
+            FigurePoint = _StartPoint;
+            string RectPointsString = _StartPoint + ',' + width.ToString() + ',' + height.ToString(); 
             RectClassRect = Rect.Parse(RectPointsString);
             LineThickness = _LineThickness;
             LineColor = _LineColor;
             FillColor = _FillColor;
+            Debug.WriteLine(FigureType);
         }
     }
 }
