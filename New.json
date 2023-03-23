@@ -1,0 +1,95 @@
+[
+  {
+    "FigureType": "BrokenLine",
+    "Name": "Petr",
+    "LineXPoint": null,
+    "LineYPoint": null,
+    "XPoint": {
+      "X": 0,
+      "Y": 0,
+      "IsDefault": true
+    },
+    "YPoint": {
+      "X": 0,
+      "Y": 0,
+      "IsDefault": true
+    },
+    "LineThickness": 2,
+    "LineColor": "Red",
+    "GetPoints": [
+      {
+        "X": 455,
+        "Y": 50,
+        "IsDefault": false
+      },
+      {
+        "X": 50,
+        "Y": 100,
+        "IsDefault": false
+      },
+      {
+        "X": 150,
+        "Y": 532,
+        "IsDefault": false
+      },
+      {
+        "X": 888,
+        "Y": 777,
+        "IsDefault": false
+      }
+    ],
+    "FigurePoint": "455 50,50 100,150 532,888 777",
+    "FillColor": null,
+    "RectClassRect": {
+      "X": 0,
+      "Y": 0,
+      "Width": 0,
+      "Height": 0,
+      "Position": {
+        "X": 0,
+        "Y": 0,
+        "IsDefault": true
+      },
+      "Size": {
+        "AspectRatio": "NaN",
+        "Width": 0,
+        "Height": 0,
+        "IsDefault": true
+      },
+      "Right": 0,
+      "Bottom": 0,
+      "Left": 0,
+      "Top": 0,
+      "TopLeft": {
+        "X": 0,
+        "Y": 0,
+        "IsDefault": true
+      },
+      "TopRight": {
+        "X": 0,
+        "Y": 0,
+        "IsDefault": true
+      },
+      "BottomLeft": {
+        "X": 0,
+        "Y": 0,
+        "IsDefault": true
+      },
+      "BottomRight": {
+        "X": 0,
+        "Y": 0,
+        "IsDefault": true
+      },
+      "Center": {
+        "X": 0,
+        "Y": 0,
+        "IsDefault": true
+      },
+      "IsEmpty": true
+    },
+    "Width": 0,
+    "Height": 0,
+    "Commands": null,
+    "ActiveButton": false
+  }
+]

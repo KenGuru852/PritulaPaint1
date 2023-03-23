@@ -19,10 +19,13 @@ using JetBrains.Annotations;
 using Avalonia.Media;
 using DynamicData.Binding;
 using System.Collections.Specialized;
+using System.IO;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
+using SkiaSharp;
+using Path = System.IO.Path;
 
 namespace Paint.ViewModels
 {
@@ -65,6 +68,14 @@ namespace Paint.ViewModels
             set { this.RaiseAndSetIfChanged(ref allFigure, value); }
         }
 
+        private ObservableCollection<Figure> allFigureLoader;
+
+        public ObservableCollection<Figure> AllFigureLoader
+        {
+            get { return allFigureLoader; }
+            set { this.RaiseAndSetIfChanged(ref allFigureLoader, value); }
+        }
+
         public ObservableCollection<MultipleCorners> MultipleCornersFig
         {
             get { return multipleCornersFig; }
@@ -75,12 +86,15 @@ namespace Paint.ViewModels
         {
             // DeleteButton = ReactiveCommand.Create<Unit, Unit>(_ => { RemoveButton(); return new Unit(); });
             AllFigure = new ObservableCollection<Figure>();
+            AllFigureLoader = new ObservableCollection<Figure>();
             content = allContent[0];
             ListBoxSelectedIndex = -1;
             CommandFormat = Formats[0];
-
+            //LoadFigures()
             xmlsavers = new XMLSaver();
             xmlloaders = new XMLLoader();
+            jsonsavers = new JSONSaver();
+            jsonloaders = new JSONLoader();
         }
 
        // public ReactiveCommand<Unit, Unit> DeleteButton { get; }
@@ -140,7 +154,8 @@ namespace Paint.ViewModels
                 {
                     if (Choosing == 0)
                     {
-                        AllFigure.Add(new Line { Name = _Name, XPoint = Point.Parse(_FirstPoint), YPoint = Point.Parse(_SecondPoint), LineThickness = lineThickness, LineColor = Colors[SelectedBoxIndex] });
+                        //AllFigure.Add(new Line { Name = _Name, LineXPoint = FirstPoint, LineYPoint = SecondPoint, LineThickness = lineThickness, LineColor = Colors[SelectedBoxIndex] });
+                        AllFigure.Add(new Line(_Name, FirstPoint, SecondPoint, lineThickness, Colors[SelectedBoxIndex]));
                     }
                     if (Choosing == 1)
                     {
@@ -183,10 +198,9 @@ namespace Paint.ViewModels
 
             if (Choosing == 0)
             {
-                Point NewXPoint = Point.Parse(FirstPoint);
-                Point NewYPoint = Point.Parse(SecondPoint);
-                AllFigure.Add(new Line { Name = NewName, XPoint = NewXPoint, 
-                YPoint = NewYPoint, LineThickness = NewThickness, LineColor = NewColor });
+                //Point NewXPoint = Point.Parse(FirstPoint);
+                //Point NewYPoint = Point.Parse(SecondPoint);
+                AllFigure.Add(new Line(_Name, FirstPoint, SecondPoint, lineThickness, Colors[SelectedBoxIndex]));
             }
 
             if (Choosing == 1)
@@ -536,10 +550,20 @@ namespace Paint.ViewModels
 
         public XMLLoader xmlloaders;
 
+        public JSONSaver jsonsavers;
+
+        public JSONLoader jsonloaders;
         public void SaveFigures(string path)
         {
+            if (Path.GetExtension(path) == ".xml")
+            {
+                xmlsavers.Save(AllFigure, path);
+            }
+            if (Path.GetExtension(path) == ".json")
             //  jsonsavers.Save(AllFigure, path);
-            xmlsavers.Save(AllFigure, path);
+            {
+                jsonsavers.Save(AllFigure, path);
+            }
             //figureSaver =  SaverLoaderFactoryCollection.FirstOrDefault(factory => factory.IsMatch(path) == true)?.CreateSaver();
             //if (figureSaver != null)
             //{
@@ -549,7 +573,29 @@ namespace Paint.ViewModels
 
         public void LoadFigures(string path)
         {
-            AllFigure = new ObservableCollection<Figure>(xmlloaders.Load(path));
+            if (Path.GetExtension(path) == ".xml")
+            {
+                AllFigure = new ObservableCollection<Figure>(xmlloaders.Load(path));
+            }
+            if (Path.GetExtension(path) == ".json")
+            {
+                AllFigure = new ObservableCollection<Figure>(jsonloaders.Load(path));
+                for (int i = 0; i < AllFigure.Count; i++)
+                {
+                    ListBoxSelectedIndex = 0;
+                    AddLine();
+                }
+            }
+            //var figureLoader = SaverLoaderFactoryCollection.FirstOrDefault(factory => factory.IsMatch(path) == true)?.CreateLoader();
+            // AllFigure = new ObservableCollection<Figure>(xmlloaders.Load(path));
+           // AllFigure = new ObservableCollection<Figure>(figureLoader.Load(path));
+            //for (int i = 0; i < AllFigure.Count; i++)
+            //{
+              //  ListBoxSelectedIndex = 0;
+                //AddLine();
+            //}
         }
     }
 }
+
+//Не импортируются точки в JSON формате

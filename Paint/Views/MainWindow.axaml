@@ -7,8 +7,8 @@
 		xmlns:models="clr-namespace:Paint.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" Height="830" Width="1400"
         x:Class="Paint.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="AvaloniaApplication2">
+        Icon="/Assets/LeshkaFace.jpg"
+		Title="AvaloniaApplication2">
 
 	<Design.DataContext>
 		<!-- This only sets the DataContext for the previewer in an IDE,
@@ -98,7 +98,7 @@
 					<Grid ColumnDefinitions="125, *">
 						<TextBlock TextAlignment="Left" VerticalAlignment="Center" FontSize="20" Grid.Column="0" Text="{Binding Name}"></TextBlock>
 						<Button Command="{Binding $parent[Window].DataContext.RemoveButton}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="40" Height="40" Grid.Column="1">
-							<Image Width="40" Height="40" Source="/Assets/trash_icon.png"/> 
+							<Image Width="40" Height="40" Source="/Assets/trash_icon.png"/>
 						</Button>
 					</Grid>
 				</DataTemplate>

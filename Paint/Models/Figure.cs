@@ -13,6 +13,10 @@ namespace Paint.Models
         public virtual string FigureType { get; set; }
         public virtual string Name { get; set; }
 
+        public virtual string LineXPoint { get; set; }
+
+        public virtual string LineYPoint { get; set; }
+
         public virtual Point XPoint { get; set; }
 
         public virtual Point YPoint { get; set; }

@@ -29,13 +29,13 @@ namespace Paint.Models
                             var figureThickness = figure.Element("Thickness");
                             var figureLineColor = figure.Element("LineColor");
                             return new Line
-                            {
-                                Name = figureName.Value,
-                                XPoint = Point.Parse(figureXPoint.Value),
-                                YPoint = Point.Parse(figureYPoint.Value),
-                                LineThickness = int.Parse(figureThickness.Value),
-                                LineColor = figureLineColor.Value
-                            };
+                            (
+                                figureName.Value,
+                                figureXPoint.Value,
+                                figureYPoint.Value,
+                                int.Parse(figureThickness.Value),
+                                figureLineColor.Value
+                            );
                                    //         AllFigure.Add(new Line
                                      //       {
                                        //         Name = NewName,
@@ -46,13 +46,13 @@ namespace Paint.Models
                                             //});
                         }
                         return new Line
-                        {
-                            Name = "UNDEFINED",
-                            XPoint = Point.Parse("100 100"),
-                            YPoint = Point.Parse("100 100"),
-                            LineThickness = 1,
-                            LineColor = "RED"
-                        };
+                        (
+                            "UNDEFINED",
+                            "100 100",
+                            "100 100",
+                            1,
+                            "RED"
+                        );
                     }
                 );
 

@@ -22,6 +22,12 @@ namespace Paint.Views
                     Name = "Xml files",
                     Extensions = new string[] { "xml" }.ToList()
                 });
+            saveFileDialog.Filters.Add(
+                new FileDialogFilter
+                {
+                    Name = "JSON files",
+                    Extensions = new string[] { "json" }.ToList()
+                });
             string? path = await saveFileDialog.ShowAsync(this);
             if (path != null)
             {
